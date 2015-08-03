@@ -5,13 +5,11 @@ namespace Graphics {
 	struct TextBufferEntry {
 		public char Char;
 		public Color Fore, Back;
-		public byte Unused;
 
-		public TextBufferEntry(char Char, Color Fore, Color Back, byte Unused = 0) {
+		public TextBufferEntry(char Char, Color Fore, Color Back) {
 			this.Char = Char;
 			this.Fore = Fore;
 			this.Back = Back;
-			this.Unused = Unused;
 		}
 
 		public static implicit operator char(TextBufferEntry E) {
@@ -51,7 +49,8 @@ void main() {
 					   mod(floor(gl_TexCoord[0].y * (buffersize.y * fontsizes.y)) + 0.5f, fontsizes.y));
 
 	vec4 fontclr = texture2D(font, (fontpos + offset) / vec2(fontsizes.x * fontsizes.z, fontsizes.y * fontsizes.w));
-	gl_FragColor = fontclr * vec4(fore.rgb, 1) + (1.0 - fontclr) * vec4(back.rgb, 1);
+	//gl_FragColor = fontclr * vec4(fore.rgb, 1) + (1.0 - fontclr) * back;
+	gl_FragColor = mix(back, vec4(fore.rgb, 1), fontclr.r);
 }
 ");
 
@@ -118,6 +117,8 @@ void main() {
 				new Vertex(new Vector2f(RT.Size.X, RT.Size.Y), Color.Blue, new Vector2f(1, 1)),
 				new Vertex(new Vector2f(0, RT.Size.Y), Color.Black, new Vector2f(0, 1)),
 			};
+
+			Clear();
 		}
 
 		public void SetFontTexture(Texture Fnt, int CharW = 8, int CharH = 12) {
@@ -127,8 +128,8 @@ void main() {
 			Dirty = true;
 		}
 
-		public void Set(int X, int Y, char C, Color Fg, Color Bg, byte Unused = 0) {
-			Set(Y * W + X, C, Fg, Bg, Unused);
+		public void Set(int X, int Y, char C, Color Fg, Color Bg) {
+			Set(Y * W + X, C, Fg, Bg);
 		}
 
 		public void Set(int X, int Y, Color Fg, Color Bg) {
@@ -142,15 +143,14 @@ void main() {
 			ForeDataRaw[Idx + 2] = Fg.B;
 			BackDataRaw[Idx] = Bg.R;
 			BackDataRaw[Idx + 1] = Bg.G;
-			BackDataRaw[Idx + 2] = Bg.B;
+			BackDataRaw[Idx + 2] = Bg.B;	
+			BackDataRaw[Idx + 3] = Bg.A;
 			Dirty = true;
 		}
 
-		public void Set(int Idx, char C, Color Fg, Color Bg, byte Unused = 0) {
+		public void Set(int Idx, char C, Color Fg, Color Bg) {
 			Set(Idx, Fg, Bg);
-			Idx *= 4;
-			ForeDataRaw[Idx + 3] = (byte)C;
-			BackDataRaw[Idx + 3] = Unused;
+			ForeDataRaw[Idx * 4 + 3] = (byte)C;
 			Dirty = true;
 		}
 
@@ -162,7 +162,7 @@ void main() {
 			Idx *= 4;
 			return new TextBufferEntry((char)ForeDataRaw[Idx + 3],
 				new Color(ForeDataRaw[Idx], ForeDataRaw[Idx + 1], ForeDataRaw[Idx + 2]),
-				new Color(BackDataRaw[Idx], BackDataRaw[Idx + 1], BackDataRaw[Idx + 2]), BackDataRaw[Idx + 3]);
+				new Color(BackDataRaw[Idx], BackDataRaw[Idx + 1], BackDataRaw[Idx + 2], BackDataRaw[Idx + 3]));
 		}
 
 		public TextBufferEntry this[int Idx] {
@@ -170,7 +170,7 @@ void main() {
 				return Get(Idx);
 			}
 			set {
-				Set(Idx, value.Char, value.Fore, value.Back, value.Unused);
+				Set(Idx, value.Char, value.Fore, value.Back);
 			}
 		}
 
@@ -179,7 +179,7 @@ void main() {
 				return Get(X, Y);
 			}
 			set {
-				Set(X, Y, value.Char, value.Fore, value.Back, value.Unused);
+				Set(X, Y, value.Char, value.Fore, value.Back);
 			}
 		}
 
@@ -224,7 +224,7 @@ void main() {
 			TextStates.Shader.SetParameter("buffersize", W, H);
 			TextStates.Shader.SetParameter("fontsizes", CharW, CharH, ASCIIFont.Size.X / CharW, ASCIIFont.Size.Y / CharH);
 
-			RT.Clear(Color.Black);
+			RT.Clear(Color.Transparent);
 			RT.Draw(ScreenQuad, PrimitiveType.Quads, TextStates);
 			RT.Display();
 		}
