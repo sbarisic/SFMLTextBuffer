@@ -1,7 +1,28 @@
-using SFML.Graphics;
+﻿using SFML.Graphics;
 using SFML.System;
 
 namespace Graphics {
+	struct TextBufferEntry {
+		public char Char;
+		public Color Fore, Back;
+		public byte Unused;
+
+		public TextBufferEntry(char Char, Color Fore, Color Back, byte Unused = 0) {
+			this.Char = Char;
+			this.Fore = Fore;
+			this.Back = Back;
+			this.Unused = Unused;
+		}
+
+		public static implicit operator char(TextBufferEntry E) {
+			return E.Char;
+		}
+
+		public static implicit operator TextBufferEntry(char C) {
+			return new TextBufferEntry(C, Color.White, Color.Black);
+		}
+	}
+
 	class TextBuffer : Drawable {
 		static Shader TextBufferShader = Shader.FromString(@"
 #version 110
@@ -43,6 +64,18 @@ void main() {
 		public int BufferHeight {
 			get {
 				return H;
+			}
+		}
+
+		public int CharWidth {
+			get {
+				return CharW;
+			}
+		}
+
+		public int CharHeight {
+			get {
+				return CharH;
 			}
 		}
 
@@ -94,8 +127,8 @@ void main() {
 			Dirty = true;
 		}
 
-		public void Set(int X, int Y, char C, Color Fg, Color Bg) {
-			Set(Y * W + X, C, Fg, Bg);
+		public void Set(int X, int Y, char C, Color Fg, Color Bg, byte Unused = 0) {
+			Set(Y * W + X, C, Fg, Bg, Unused);
 		}
 
 		public void Set(int X, int Y, Color Fg, Color Bg) {
@@ -113,13 +146,44 @@ void main() {
 			Dirty = true;
 		}
 
-		public void Set(int Idx, char C, Color Fg, Color Bg) {
+		public void Set(int Idx, char C, Color Fg, Color Bg, byte Unused = 0) {
 			Set(Idx, Fg, Bg);
 			Idx *= 4;
 			ForeDataRaw[Idx + 3] = (byte)C;
-			BackDataRaw[Idx + 3] = 0;
+			BackDataRaw[Idx + 3] = Unused;
 			Dirty = true;
 		}
+
+		public TextBufferEntry Get(int X, int Y) {
+			return Get(Y * W + X);
+		}
+
+		public TextBufferEntry Get(int Idx) {
+			Idx *= 4;
+			return new TextBufferEntry((char)ForeDataRaw[Idx + 3],
+				new Color(ForeDataRaw[Idx], ForeDataRaw[Idx + 1], ForeDataRaw[Idx + 2]),
+				new Color(BackDataRaw[Idx], BackDataRaw[Idx + 1], BackDataRaw[Idx + 2]), BackDataRaw[Idx + 3]);
+		}
+
+		public TextBufferEntry this[int Idx] {
+			get {
+				return Get(Idx);
+			}
+			set {
+				Set(Idx, value.Char, value.Fore, value.Back, value.Unused);
+			}
+		}
+
+		public TextBufferEntry this[int X, int Y] {
+			get {
+				return Get(X, Y);
+			}
+			set {
+				Set(X, Y, value.Char, value.Fore, value.Back, value.Unused);
+			}
+		}
+
+
 
 		public void Clear(char C = (char)0) {
 			Clear(C, Color.White, Color.Black);
