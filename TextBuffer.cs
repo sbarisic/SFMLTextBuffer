@@ -48,7 +48,7 @@ void main() {
 	
 	vec2 fontpos = vec2(floor(mod(char, fontsizes.z)) * fontsizes.x, floor(char / fontsizes.w) * fontsizes.y);
 	vec2 offset = vec2(mod(floor(gl_TexCoord[0].x * (buffersize.x * fontsizes.x)), fontsizes.x),
-					   mod(floor(gl_TexCoord[0].y * (buffersize.y * fontsizes.y)), fontsizes.y));
+					   mod(floor(gl_TexCoord[0].y * (buffersize.y * fontsizes.y)) + 0.5f, fontsizes.y));
 
 	vec4 fontclr = texture2D(font, (fontpos + offset) / vec2(fontsizes.x * fontsizes.z, fontsizes.y * fontsizes.w));
 	gl_FragColor = fontclr * vec4(fore.rgb, 1) + (1.0 - fontclr) * vec4(back.rgb, 1);
