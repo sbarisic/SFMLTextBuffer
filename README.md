@@ -2,7 +2,11 @@
 TextBuffers for SFML
 
 # Screenshots
+![alt text](https://raw.githubusercontent.com/cartman300/SFMLTextBuffer/master/screenshots/a.png "Hello World!")
 
+![alt text](https://raw.githubusercontent.com/cartman300/SFMLTextBuffer/master/screenshots/b.png "Colors")
+
+![alt text](https://raw.githubusercontent.com/cartman300/SFMLTextBuffer/master/screenshots/c.png "More colors")
 
 # Example usage
 ```csharp
