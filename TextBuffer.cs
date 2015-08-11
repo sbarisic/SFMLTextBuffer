@@ -49,7 +49,7 @@ void main() {
 ";
 
 		const string TextBufferFrag = @"
-#version 110
+#version 120
 
 uniform sampler2D font;
 uniform sampler2D foredata;
@@ -60,15 +60,14 @@ uniform vec4 fontsizes;
 void main() {
 	vec4 fore = texture2D(foredata, gl_TexCoord[0].xy);
 	vec4 back = texture2D(backdata, gl_TexCoord[0].xy);
-	float char = 255 * fore.a;
+	float chr = 255.0f * fore.a;
 	
-	vec2 fontpos = vec2(floor(mod(char, fontsizes.z)) * fontsizes.x, floor(char / fontsizes.w) * fontsizes.y);
+	vec2 fontpos = vec2(floor(mod(chr, fontsizes.z)) * fontsizes.x, floor(chr / fontsizes.w) * fontsizes.y);
 	vec2 offset = vec2(mod(floor(gl_TexCoord[0].x * (buffersize.x * fontsizes.x)), fontsizes.x),
 					   mod(floor(gl_TexCoord[0].y * (buffersize.y * fontsizes.y)) + 0.5f, fontsizes.y));
 
 	vec4 fontclr = texture2D(font, (fontpos + offset) / vec2(fontsizes.x * fontsizes.z, fontsizes.y * fontsizes.w));
-	//gl_FragColor = fontclr * vec4(fore.rgb, 1) + (1.0 - fontclr) * back;
-	gl_FragColor = mix(back, vec4(fore.rgb, 1), fontclr.r);
+	gl_FragColor = mix(back, vec4(fore.rgb, 1.0f), fontclr.r);
 }
 ";
 		static Shader TextBufferShader = null;
@@ -202,8 +201,6 @@ void main() {
 				Set(X, Y, value.Char, value.Fore, value.Back);
 			}
 		}
-
-
 
 		public void Clear(char C = (char)0) {
 			Clear(C, Color.White, Color.Black);
