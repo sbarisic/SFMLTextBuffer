@@ -18,5 +18,8 @@ TBuffer.Print(10, 10, "Hello World!");
 RenderTarget.Draw(TBuffer);
 ```
 
+# C++ version by harddal
+https://github.com/harddal/TextBuffer
+
 # License
 Do whatever you want etc. etc.
