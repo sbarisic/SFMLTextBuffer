@@ -10,8 +10,7 @@ TextBuffers for SFML
 
 # Example usage
 ```c#
-TextBuffer TBuffer = new TextBuffer(80, 25);
-TBuffer.SetFontTexture(ResourceMgr.Get<Texture>("font")); // Load font
+TextBuffer TBuffer = new TextBuffer(80, 25, new Texture("font.png"));
 TBuffer.Print(10, 10, "Hello World!");
 // TBuffer.Sprite.* - Change position, color, whatever.
 
