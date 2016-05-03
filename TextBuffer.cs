@@ -63,8 +63,8 @@ void main() {
 	float chr = 255.0f * fore.a;
 	
 	vec2 fontpos = vec2(floor(mod(chr, fontsizes.z)) * fontsizes.x, floor(chr / fontsizes.w) * fontsizes.y);
-	vec2 offset = vec2(mod(floor(gl_TexCoord[0].x * (buffersize.x * fontsizes.x)), fontsizes.x),
-					   mod(floor(gl_TexCoord[0].y * (buffersize.y * fontsizes.y)) + 0.5f, fontsizes.y));
+	vec2 offset = vec2(mod(gl_TexCoord[0].x * (buffersize.x * fontsizes.x), fontsizes.x),
+		mod(gl_TexCoord[0].y * (buffersize.y * fontsizes.y), fontsizes.y));
 
 	vec4 fontclr = texture2D(font, (fontpos + offset) / vec2(fontsizes.x * fontsizes.z, fontsizes.y * fontsizes.w));
 	gl_FragColor = mix(back, vec4(fore.rgb, 1.0f), fontclr.r);
@@ -109,12 +109,14 @@ void main() {
 		Texture ForeData, BackData, ASCIIFont;
 		byte[] ForeDataRaw, BackDataRaw;
 
-		public TextBuffer(uint W, uint H) {
+		public TextBuffer(uint W, uint H, Texture Fnt, int CharW = 8, int CharH = 12) {
 			this.W = (int)W;
 			this.H = (int)H;
+			this.CharW = CharW;
+			this.CharH = CharH;
 			Dirty = true;
-			CharW = 8;
-			CharH = 12;
+
+			SetFontTexture(Fnt);
 
 			ForeDataRaw = new byte[W * H * 4];
 			ForeData = new Texture(new Image(W, H, ForeDataRaw));
@@ -140,9 +142,7 @@ void main() {
 			Clear();
 		}
 
-		public void SetFontTexture(Texture Fnt, int CharW = 8, int CharH = 12) {
-			this.CharW = CharW;
-			this.CharH = CharH;
+		public void SetFontTexture(Texture Fnt) {
 			ASCIIFont = Fnt;
 			Dirty = true;
 		}
